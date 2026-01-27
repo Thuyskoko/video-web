@@ -3,50 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <title>Videos</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <style>
-body{margin:0;background:#020617;color:white;font-family:sans-serif}
-.card{
-  margin:12px;
-  padding:15px;
-  background:#0f172a;
-  border-radius:14px;
+body{
+  margin:0;
+  background:#020617;
+  color:#fff;
+  font-family:sans-serif;
 }
-button{
-  margin-top:10px;
-  padding:8px 14px;
-  border:none;
-  border-radius:10px;
-  background:#22c55e;
+h2{text-align:center;padding:15px;}
+.video{
+  margin:15px;
+  background:#0f172a;
+  padding:15px;
+  border-radius:15px;
+}
+iframe{
+  width:100%;
+  height:200px;
+  border-radius:12px;
 }
 </style>
 </head>
+
 <body>
 
-<h2 style="padding:10px">🔥 Videos</h2>
+<h2>🎬 Videos</h2>
 <div id="list"></div>
 
-<script src="common.js"></script>
 <script>
-db.collection("videos")
-.orderBy("createdAt","desc")
-.onSnapshot(snap=>{
-  list.innerHTML="";
-  snap.forEach(doc=>{
-    const v = doc.data();
+var firebaseConfig = {
+  apiKey: "AIzaSyDahNKp2jaiJSHzNkKw_VtcCR55y9-IHTQ",
+  authDomain: "lovely-7c35f.firebaseapp.com",
+  databaseURL: "https://lovely-7c35f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "lovely-7c35f",
+  storageBucket: "lovely-7c35f.firebasestorage.app"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const list = document.getElementById("list");
+
+/* 🔥 READ videos from Firebase */
+firebase.database().ref("videos").on("value", snap=>{
+  list.innerHTML = "";
+  snap.forEach(child=>{
+    const v = child.val();
     list.innerHTML += `
-      <div class="card">
+      <div class="video">
         <h3>${v.title}</h3>
-        <button onclick="watch('${v.url}')">Watch</button>
+        <iframe src="${v.url}" allowfullscreen></iframe>
       </div>
     `;
   });
 });
-
-function watch(url){
-  localStorage.setItem("video",url);
-  location.href="watch.html";
-}
 </script>
+
 </body>
 </html>
