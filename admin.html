@@ -1,88 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Admin Panel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <style>
 body{
   margin:0;
-  background:linear-gradient(135deg,#020617,#020617,#0f172a);
-  min-height:100vh;
-  font-family:sans-serif;
-  color:white;
-  padding:20px;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(circle at top,#020617,#000);
+  font-family:Arial,Helvetica,sans-serif;
+  color:#fff;
 }
-.panel{
+.card{
+  width:92%;
   max-width:420px;
-  margin:auto;
+  background:linear-gradient(145deg,#0f172a,#020617);
   padding:25px;
-  background:rgba(255,255,255,0.07);
-  backdrop-filter:blur(15px);
-  border-radius:24px;
-  box-shadow:
-    inset 0 0 25px rgba(255,255,255,.05),
-    0 40px 80px rgba(0,0,0,.8);
-  transform:perspective(800px) rotateX(2deg);
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,255,255,.2);
 }
-input,button{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  border:none;
-  border-radius:14px;
+h2{
+  text-align:center;
+  margin-bottom:20px;
 }
 input{
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  border:none;
+  border-radius:14px;
   background:#020617;
-  color:white;
+  color:#fff;
+  font-size:15px;
+  outline:none;
 }
 button{
-  background:linear-gradient(135deg,#38bdf8,#22c55e);
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
   font-weight:bold;
-  color:#000;
+  color:#fff;
+  cursor:pointer;
+  background:linear-gradient(135deg,#22d3ee,#22c55e);
+  box-shadow:0 10px 30px rgba(34,211,238,.4);
 }
-small{opacity:.7}
+button:active{transform:scale(.97);}
 </style>
 </head>
+
 <body>
 
-<div class="panel">
+<div class="card">
   <h2>🎬 Add YouTube Video</h2>
-
-  <input id="title" placeholder="Video Title">
-  <input id="url" placeholder="YouTube Embed URL">
-  <small>
-    Example:<br>
-    https://www.youtube.com/embed/VIDEO_ID
-  </small>
-
+  <input id="title" type="text" placeholder="Video title">
+  <input id="link" type="text" placeholder="YouTube link">
   <button onclick="addVideo()">ADD VIDEO</button>
 </div>
 
-<script src="common.js"></script>
 <script>
-// protect admin
-auth.onAuthStateChanged(u=>{
-  if(!u) location.href="login.html";
-});
+/* 🔥 Firebase Config (lovely-7c35f) */
+var firebaseConfig = {
+  apiKey: "AIzaSyDahNKp2jaiJSHzNkKw_VtcCR55y9-IHTQ",
+  authDomain: "lovely-7c35f.firebaseapp.com",
+  databaseURL: "https://lovely-7c35f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "lovely-7c35f",
+  storageBucket: "lovely-7c35f.firebasestorage.app"
+};
 
+firebase.initializeApp(firebaseConfig);
+
+/* 🔁 Convert YouTube link → embed */
+function getEmbedUrl(url){
+  let id="";
+  if(url.includes("youtu.be/")){
+    id = url.split("youtu.be/")[1].split("?")[0];
+  }else if(url.includes("watch?v=")){
+    id = url.split("watch?v=")[1].split("&")[0];
+  }else if(url.includes("embed/")){
+    return url;
+  }
+  return "https://www.youtube.com/embed/" + id;
+}
+
+/* ➕ Add video to Firebase */
 function addVideo(){
-  if(!title.value || !url.value){
+  const title = document.getElementById("title").value.trim();
+  const link  = document.getElementById("link").value.trim();
+
+  if(!title || !link){
     alert("Fill all fields");
     return;
   }
 
-  db.collection("videos").add({
-    title: title.value,
-    url: url.value,
-    type: "youtube",
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  const embedUrl = getEmbedUrl(link);
+
+  firebase.database().ref("videos").push({
+    title: title,
+    url: embedUrl,
+    time: Date.now()
   }).then(()=>{
     alert("Video Added ✅");
-    title.value="";
-    url.value="";
+    document.getElementById("title").value="";
+    document.getElementById("link").value="";
+  }).catch(e=>{
+    alert(e.message);
   });
 }
 </script>
+
 </body>
 </html>
