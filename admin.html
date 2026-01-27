@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2 class="title">🛠 Admin Panel</h2>
+<h1 class="title">🛠 Admin Panel</h1>
 
-<div class="card">
+<div class="panel">
   <input id="title" placeholder="Video Title">
-  <input id="link" placeholder="Video MP4 / YouTube link">
+  <input id="link" placeholder="YouTube / MP4 Link">
   <button onclick="addVideo()">➕ Add Video</button>
 </div>
 
-<h3>📂 Video List</h3>
-<div id="adminList" class="list"></div>
+<h2>📂 Video List</h2>
+<div id="adminVideos"></div>
 
 <script src="script.js"></script>
 </body>
