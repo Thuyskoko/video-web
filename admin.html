@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{
+  margin:0;
+  background:linear-gradient(135deg,#020617,#020617,#0f172a);
+  min-height:100vh;
+  font-family:sans-serif;
+  color:white;
+  padding:20px;
+}
+.panel{
+  max-width:420px;
+  margin:auto;
+  padding:25px;
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(15px);
+  border-radius:24px;
+  box-shadow:
+    inset 0 0 25px rgba(255,255,255,.05),
+    0 40px 80px rgba(0,0,0,.8);
+  transform:perspective(800px) rotateX(2deg);
+}
+input,button{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border:none;
+  border-radius:14px;
+}
+input{
+  background:#020617;
+  color:white;
+}
+button{
+  background:linear-gradient(135deg,#38bdf8,#22c55e);
+  font-weight:bold;
+  color:#000;
+}
+small{opacity:.7}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h2>🎬 Add YouTube Video</h2>
+
+  <input id="title" placeholder="Video Title">
+  <input id="url" placeholder="YouTube Embed URL">
+  <small>
+    Example:<br>
+    https://www.youtube.com/embed/VIDEO_ID
+  </small>
+
+  <button onclick="addVideo()">ADD VIDEO</button>
+</div>
+
+<script src="common.js"></script>
+<script>
+// protect admin
+auth.onAuthStateChanged(u=>{
+  if(!u) location.href="login.html";
+});
+
+function addVideo(){
+  if(!title.value || !url.value){
+    alert("Fill all fields");
+    return;
+  }
+
+  db.collection("videos").add({
+    title: title.value,
+    url: url.value,
+    type: "youtube",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("Video Added ✅");
+    title.value="";
+    url.value="";
+  });
+}
+</script>
+</body>
+</html>

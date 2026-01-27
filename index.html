@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Videos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{margin:0;background:#020617;color:white;font-family:sans-serif}
+.card{
+  margin:12px;
+  padding:15px;
+  background:#0f172a;
+  border-radius:14px;
+}
+button{
+  margin-top:10px;
+  padding:8px 14px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+}
+</style>
+</head>
+<body>
+
+<h2 style="padding:10px">🔥 Videos</h2>
+<div id="list"></div>
+
+<script src="common.js"></script>
+<script>
+db.collection("videos")
+.orderBy("createdAt","desc")
+.onSnapshot(snap=>{
+  list.innerHTML="";
+  snap.forEach(doc=>{
+    const v = doc.data();
+    list.innerHTML += `
+      <div class="card">
+        <h3>${v.title}</h3>
+        <button onclick="watch('${v.url}')">Watch</button>
+      </div>
+    `;
+  });
+});
+
+function watch(url){
+  localStorage.setItem("video",url);
+  location.href="watch.html";
+}
+</script>
+</body>
+</html>
