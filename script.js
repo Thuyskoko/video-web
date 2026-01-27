@@ -1,77 +1,64 @@
-// ================= FIREBASE CONFIG =================
-var firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
-};
+let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// ---------- ADMIN ----------
+function addVideo(){
+  let title = document.getElementById("title").value;
+  let link  = document.getElementById("link").value;
 
-// ================= DATABASE =================
-var database = firebase.database();
-var videoRef = database.ref("videos");
-
-// ================= ADD VIDEO =================
-function addVideo() {
-  var title = document.getElementById("title").value;
-  var link  = document.getElementById("link").value;
-
-  if(title === "" || link === ""){
-    alert("Title & Link required");
+  if(title=="" || link==""){
+    alert("Fill all fields");
     return;
   }
 
-  videoRef.push({
-    title: title,
-    link: link,
-    time: Date.now()
-  });
+  videos.push({title,link});
+  localStorage.setItem("videos",JSON.stringify(videos));
 
-  document.getElementById("title").value = "";
-  document.getElementById("link").value = "";
+  document.getElementById("title").value="";
+  document.getElementById("link").value="";
+
+  renderAdmin();
 }
 
-// ================= LOAD + AUTO UPDATE =================
-videoRef.on("value", function(snapshot) {
-  var adminDiv = document.getElementById("adminVideos");
-  adminDiv.innerHTML = "";
+function deleteVideo(i){
+  videos.splice(i,1);
+  localStorage.setItem("videos",JSON.stringify(videos));
+  renderAdmin();
+}
 
-  snapshot.forEach(function(child) {
-    var id = child.key;
-    var data = child.val();
+function renderAdmin(){
+  let box=document.getElementById("adminList");
+  if(!box) return;
 
-    adminDiv.innerHTML += `
-      <div class="card">
-        <h3>${data.title}</h3>
-        <p>${data.link}</p>
-        <button onclick="editVideo('${id}','${data.title}','${data.link}')">✏ Edit</button>
-        <button onclick="deleteVideo('${id}')">🗑 Delete</button>
+  box.innerHTML="";
+  videos.forEach((v,i)=>{
+    box.innerHTML+=`
+      <div class="video">
+        <b>${v.title}</b>
+        <button onclick="deleteVideo(${i})">❌ Delete</button>
       </div>
     `;
   });
-});
-
-// ================= EDIT VIDEO =================
-function editVideo(id,title,link){
-  var newTitle = prompt("Edit title", title);
-  var newLink  = prompt("Edit link", link);
-
-  if(newTitle && newLink){
-    videoRef.child(id).update({
-      title: newTitle,
-      link: newLink
-    });
-  }
 }
 
-// ================= DELETE VIDEO =================
-function deleteVideo(id){
-  if(confirm("Delete this video?")){
-    videoRef.child(id).remove();
-  }
+// ---------- USER ----------
+function renderUser(){
+  let box=document.getElementById("videoList");
+  if(!box) return;
+
+  box.innerHTML="";
+  videos.forEach(v=>{
+    box.innerHTML+=`
+      <div class="video">
+        <b>${v.title}</b>
+        <button onclick="play('${v.link}')">▶ Play</button>
+      </div>
+    `;
+  });
 }
+
+function play(url){
+  window.open(url,"_blank");
+}
+
+renderAdmin();
+renderUser();
