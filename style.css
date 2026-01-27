@@ -1,89 +1,59 @@
-*{
-  box-sizing:border-box;
-  font-family: "Segoe UI", sans-serif;
-}
-
 body{
   margin:0;
-  height:100vh;
-  background:#020617;
-  overflow:hidden;
+  font-family:sans-serif;
+  background:linear-gradient(135deg,#020617,#020024);
   color:white;
 }
 
-/* animated gradient bg */
-.bg{
-  position:fixed;
-  inset:0;
-  background:linear-gradient(120deg,#7c3aed,#06b6d4,#22c55e);
-  filter:blur(120px);
-  animation:move 10s infinite alternate;
-}
-
-@keyframes move{
-  0%{transform:translate(-20%,-20%)}
-  100%{transform:translate(20%,20%)}
-}
-
-/* panel */
-.panel{
-  position:relative;
-  max-width:420px;
-  margin:40px auto;
-  padding:20px;
-  background:rgba(255,255,255,0.08);
-  border-radius:20px;
-  backdrop-filter:blur(20px);
-  box-shadow:0 30px 60px rgba(0,0,0,.6);
-}
-
-h1{
+.title{
   text-align:center;
-  margin-bottom:20px;
+  padding:15px;
 }
 
-/* 3D cards */
 .card{
-  background:rgba(0,0,0,.4);
-  padding:15px;
-  border-radius:16px;
-  box-shadow:
-    inset 0 0 20px rgba(255,255,255,.05),
-    0 20px 40px rgba(0,0,0,.5);
-  margin-bottom:20px;
+  margin:15px;
+  padding:20px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.08);
+  box-shadow:0 20px 40px rgba(0,0,0,.6);
 }
 
 input{
   width:100%;
   padding:12px;
   margin-bottom:10px;
+  border-radius:12px;
   border:none;
-  border-radius:10px;
+  outline:none;
   background:#020617;
   color:white;
-  outline:none;
 }
 
 button{
   width:100%;
-  padding:12px;
+  padding:14px;
   border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#22c55e,#06b6d4);
-  color:#000;
+  border-radius:14px;
+  font-size:16px;
+  background:linear-gradient(90deg,#22c55e,#06b6d4);
+  color:black;
   font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 10px 25px rgba(0,0,0,.5);
-  transition:.3s;
 }
 
-button:hover{
-  transform:translateY(-2px);
+.list{
+  margin:15px;
 }
 
-.list .item{
-  padding:10px;
-  margin-top:8px;
-  border-radius:10px;
-  background:rgba(255,255,255,.05);
+.video{
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.08);
+  box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.video button{
+  margin-top:10px;
+  background:#ef4444;
+  color:white;
 }
