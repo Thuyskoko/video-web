@@ -1,184 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Admin Panel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Firebase v8 -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<style>
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding-top:40px;
-  background:radial-gradient(circle at top,#020617,#000);
-  font-family:Arial,Helvetica,sans-serif;
-  color:#fff;
-}
-.card{
-  width:92%;
-  max-width:420px;
-  background:linear-gradient(145deg,#0f172a,#020617);
-  padding:25px;
-  border-radius:20px;
-  box-shadow:0 20px 60px rgba(0,255,255,.2);
-}
-h2{
-  text-align:center;
-  margin-bottom:20px;
-}
-input{
-  width:100%;
-  padding:14px;
-  margin-bottom:15px;
-  border:none;
-  border-radius:14px;
-  background:#020617;
-  color:#fff;
-  font-size:15px;
-  outline:none;
-}
-button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:14px;
-  font-size:16px;
-  font-weight:bold;
-  color:#fff;
-  cursor:pointer;
-  background:linear-gradient(135deg,#22d3ee,#22c55e);
-  box-shadow:0 10px 30px rgba(34,211,238,.4);
-}
-button:active{transform:scale(.97);}
-
-hr{
-  margin:25px 0;
-  opacity:.3;
-}
-
-/* Video list */
-.video-item{
-  background:#020617;
-  padding:12px;
-  border-radius:14px;
-  margin-bottom:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
-}
-.video-item span{
-  font-size:14px;
-  max-width:70%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.del-btn{
-  background:#ef4444;
-  border:none;
-  border-radius:10px;
-  padding:6px 12px;
-  color:#fff;
-  font-size:13px;
-  cursor:pointer;
-}
-</style>
+    <title>Lovely Admin</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { background: #e0e5ec; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #e0e5ec; padding: 40px; border-radius: 30px; box-shadow: 20px 20px 60px #bec3c9, -20px -20px 60px #ffffff; text-align: center; width: 320px; }
+        input { padding: 15px; border: none; border-radius: 12px; box-shadow: inset 6px 6px 12px #bec3c9, inset -6px -6px 12px #ffffff; background: #e0e5ec; width: 90%; outline: none; margin-bottom: 25px; }
+        button { padding: 15px 30px; border: none; border-radius: 12px; background: #6366f1; color: white; font-weight: bold; cursor: pointer; box-shadow: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff; width: 100%; }
+        button:active { box-shadow: inset 4px 4px 8px #bec3c9, inset -4px -4px 8px #ffffff; }
+    </style>
 </head>
-
 <body>
-
 <div class="card">
-  <h2>🎬 Add YouTube Video</h2>
-
-  <input id="title" type="text" placeholder="Video title">
-  <input id="link" type="text" placeholder="YouTube link">
-
-  <button onclick="addVideo()">ADD VIDEO</button>
-
-  <hr>
-
-  <div id="videoList"></div>
+    <h2>Update ID</h2>
+    <input type="text" id="vidInput" placeholder="YouTube ID">
+    <button onclick="saveToFirebase()">UPDATE</button>
 </div>
-
 <script>
-/* 🔥 Firebase Config */
-var firebaseConfig = {
-  apiKey: "AIzaSyDahNKp2jaiJSHzNkKw_VtcCR55y9-IHTQ",
-  authDomain: "lovely-7c35f.firebaseapp.com",
-  databaseURL: "https://lovely-7c35f-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "lovely-7c35f",
-  storageBucket: "lovely-7c35f.firebasestorage.app"
-};
-firebase.initializeApp(firebaseConfig);
-
-/* 🔁 Convert YouTube link → embed */
-function getEmbedUrl(url){
-  let id="";
-  if(url.includes("youtu.be/")){
-    id = url.split("youtu.be/")[1].split("?")[0];
-  }else if(url.includes("watch?v=")){
-    id = url.split("watch?v=")[1].split("&")[0];
-  }else if(url.includes("embed/")){
-    return url;
-  }
-  return "https://www.youtube.com/embed/" + id;
-}
-
-/* ➕ Add video */
-function addVideo(){
-  const title = document.getElementById("title").value.trim();
-  const link  = document.getElementById("link").value.trim();
-
-  if(!title || !link){
-    alert("Fill all fields");
-    return;
-  }
-
-  firebase.database().ref("videos").push({
-    title: title,
-    url: getEmbedUrl(link),
-    time: Date.now()
-  }).then(()=>{
-    document.getElementById("title").value="";
-    document.getElementById("link").value="";
-  });
-}
-
-/* 📃 Show video list (Realtime) */
-const listDiv = document.getElementById("videoList");
-
-firebase.database().ref("videos").on("value", snap=>{
-  listDiv.innerHTML = "";
-  snap.forEach(child=>{
-    const v = child.val();
-    const key = child.key;
-
-    listDiv.innerHTML += `
-      <div class="video-item">
-        <span>${v.title}</span>
-        <button class="del-btn" onclick="deleteVideo('${key}')">
-          Delete
-        </button>
-      </div>
-    `;
-  });
-});
-
-/* 🗑 Delete video */
-function deleteVideo(key){
-  if(confirm("Delete this video?")){
-    firebase.database().ref("videos/"+key).remove();
-  }
-}
+    const firebaseConfig = {
+        apiKey: "AIzaSyDahNKp2jaiJSHzNkKw_VtcCR55y9-IHTQ",
+        databaseURL: "https://lovely-7c35f-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    function saveToFirebase() {
+        const newId = document.getElementById('vidInput').value.trim();
+        if(newId) {
+            firebase.database().ref('video_data').update({ current_id: newId }).then(() => { alert("Updated!"); });
+        }
+    }
 </script>
-
 </body>
 </html>
