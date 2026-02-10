@@ -5,30 +5,45 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #1a1a2e; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        .video-card { width: 95%; max-width: 700px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden; padding: 10px; }
-        .video-wrapper { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 15px; overflow: hidden; }
-        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #0f172a; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .video-container { width: 92%; max-width: 800px; aspect-ratio: 16/9; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5); background: #000; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-<div class="video-card">
-    <div class="video-wrapper">
-        <iframe id="vidFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    </div>
+<div class="video-container">
+    <div id="player"></div>
 </div>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyDahNKp2jaiJSHzNkKw_VtcCR55y9-IHTQ",
         databaseURL: "https://lovely-7c35f-default-rtdb.asia-southeast1.firebasedatabase.app"
     };
     firebase.initializeApp(firebaseConfig);
-    firebase.database().ref('video_data/current_id').on('value', (snapshot) => {
-        const id = snapshot.val();
-        if(id) {
-            document.getElementById('vidFrame').src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=0&loop=1&playlist=${id}&controls=1&rel=0`;
-        }
-    });
+
+    // Load YouTube IFrame API
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player;
+    function onYouTubeIframeAPIReady() {
+        firebase.database().ref('video_data/current_id').on('value', (snapshot) => {
+            const id = snapshot.val();
+            if(id) {
+                if(!player) {
+                    player = new YT.Player('player', {
+                        videoId: id,
+                        playerVars: { 'autoplay': 1, 'mute': 0, 'rel': 0, 'showinfo': 0, 'ecver': 2 },
+                    });
+                } else {
+                    player.loadVideoById(id);
+                }
+            }
+        });
+    }
 </script>
 </body>
 </html>
