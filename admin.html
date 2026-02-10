@@ -3,60 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Video Admin Pro</title>
+    <title>Premium Video Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        :root { --bg: #e0e5ec; --text: #444; --primary: #6366f1; }
-        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: var(--text); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        .card { 
-            background: var(--bg); padding: 30px; border-radius: 30px; 
-            box-shadow: 20px 20px 60px #bec3c9, -20px -20px 60px #ffffff; 
-            width: 90%; max-width: 400px; text-align: center; margin-bottom: 30px;
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 30px 15px; color: #fff;
         }
 
-        h2 { margin-bottom: 25px; font-weight: 600; }
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%; max-width: 500px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            margin-bottom: 25px;
+        }
+
+        h2, h3 { font-weight: 500; letter-spacing: 1px; margin-bottom: 20px; text-align: center; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
         
-        input { 
-            width: 85%; padding: 15px; border: none; border-radius: 12px; 
-            background: var(--bg); outline: none; margin-bottom: 20px;
-            box-shadow: inset 6px 6px 12px #bec3c9, inset -6px -6px 12px #ffffff;
-            transition: 0.3s;
+        input {
+            width: 100%; padding: 15px 20px; background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px;
+            outline: none; color: #fff; font-size: 15px; transition: 0.3s;
+        }
+        input::placeholder { color: rgba(255, 255, 255, 0.6); }
+        input:focus { border-color: #fff; background: rgba(255, 255, 255, 0.2); }
+
+        button {
+            width: 100%; padding: 15px; border: none; border-radius: 12px;
+            font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 16px;
         }
 
-        button { 
-            width: 95%; padding: 15px; border: none; border-radius: 12px; 
-            background: var(--primary); color: white; font-weight: bold; cursor: pointer;
-            box-shadow: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff; transition: 0.2s;
+        .btn-update {
+            background: #fff; color: #764ba2;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        button:active { box-shadow: inset 4px 4px 8px #a5a9b0, inset -4px -4px 8px #ffffff; transform: scale(0.98); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        button:active { transform: translateY(0); }
 
-        .history-card {
-            width: 90%; max-width: 400px; background: var(--bg); padding: 20px; 
-            border-radius: 30px; box-shadow: 10px 10px 30px #bec3c9, -10px -10px 30px #ffffff;
-        }
+        /* History List Style */
         .history-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px; border-radius: 10px; margin-bottom: 10px;
-            box-shadow: 4px 4px 8px #bec3c9, -4px -4px 8px #ffffff; background: var(--bg);
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px; padding: 18px; margin-bottom: 15px;
+            border-left: 5px solid #fff; transition: 0.3s;
         }
-        .history-item span { font-size: 13px; font-family: monospace; }
-        .btn-restore { background: #4caf50; padding: 5px 10px; border-radius: 5px; color: white; cursor: pointer; font-size: 12px; border: none; }
+        .history-item:hover { background: rgba(255, 255, 255, 0.15); }
+
+        .url-display {
+            font-size: 13px; color: rgba(255, 255, 255, 0.8);
+            word-break: break-all; font-family: monospace; margin-bottom: 15px;
+            display: block; line-height: 1.5;
+        }
+
+        .actions { display: flex; gap: 10px; justify-content: flex-end; }
+        
+        .btn-use { background: #4ade80; color: #064e3b; padding: 8px 18px; font-size: 13px; }
+        .btn-delete { background: #f87171; color: #7f1d1d; padding: 8px 18px; font-size: 13px; }
+
+        #status { text-align: center; font-size: 14px; margin-top: 15px; font-weight: 300; }
+
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Update Video</h2>
-    <input type="text" id="vidInput" placeholder="Enter YouTube Video ID">
-    <button onclick="updateVideo()">UPDATE NOW</button>
-    <p id="status" style="margin-top:15px; font-size:14px; color: #4caf50;"></p>
+<div class="glass-card">
+    <h2>Video Controller</h2>
+    <div class="input-group">
+        <input type="text" id="videoUrl" placeholder="Paste Direct Video URL here...">
+    </div>
+    <button class="btn-update" onclick="updateVideo()">Update Live Video</button>
+    <p id="status"></p>
 </div>
 
-<div class="history-card">
-    <h3 style="text-align:center;">Update History</h3>
-    <div id="historyList">Loading...</div>
+<div class="glass-card">
+    <h3>Update History</h3>
+    <div id="historyList">Loading database...</div>
 </div>
 
 <script>
@@ -68,26 +99,22 @@
     const db = firebase.database();
 
     function updateVideo() {
-        const id = document.getElementById('vidInput').value.trim();
+        const url = document.getElementById('videoUrl').value.trim();
         const status = document.getElementById('status');
-        
-        if(id.length < 11) { alert("Invalid ID"); return; }
+        if(!url) return alert("Please enter a valid URL");
 
-        db.ref('video_data').update({ current_id: id })
+        db.ref('video_data').update({ current_id: url })
         .then(() => {
-            db.ref('history').push({
-                video_id: id,
-                timestamp: Date.now()
-            });
-            status.innerText = "Updated Successfully!";
-            document.getElementById('vidInput').value = "";
+            db.ref('history').push({ url: url, timestamp: Date.now() });
+            status.innerText = "✓ System Updated Successfully";
+            document.getElementById('videoUrl').value = "";
             setTimeout(() => { status.innerText = ""; }, 3000);
         });
     }
 
-    db.ref('history').limitToLast(5).on('value', (snapshot) => {
-        const historyList = document.getElementById('historyList');
-        historyList.innerHTML = "";
+    db.ref('history').on('value', (snapshot) => {
+        const list = document.getElementById('historyList');
+        list.innerHTML = "";
         const data = snapshot.val();
         
         if(data) {
@@ -96,19 +123,30 @@
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 div.innerHTML = `
-                    <span>ID: ${item.video_id}</span>
-                    <button class="btn-restore" onclick="restoreID('${item.video_id}')">Use</button>
+                    <span class="url-display">${item.url}</span>
+                    <div class="actions">
+                        <button class="btn-use" onclick="restoreURL('${item.url}')">Use Again</button>
+                        <button class="btn-delete" onclick="deleteHistory('${key}')">Remove</button>
+                    </div>
                 `;
-                historyList.appendChild(div);
+                list.appendChild(div);
             });
         } else {
-            historyList.innerHTML = "No history found.";
+            list.innerHTML = "<p style='text-align:center; opacity:0.6;'>No history recorded yet.</p>";
         }
     });
 
-    function restoreID(id) {
-        document.getElementById('vidInput').value = id;
+    function deleteHistory(key) {
+        if(confirm("Confirm to delete from history?")) {
+            db.ref('history').child(key).remove();
+        }
+    }
+
+    function restoreURL(url) {
+        document.getElementById('videoUrl').value = url;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
+
 </body>
 </html>
