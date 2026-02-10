@@ -1,34 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Lovely Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Video Admin Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { background: #e0e5ec; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #e0e5ec; padding: 40px; border-radius: 30px; box-shadow: 20px 20px 60px #bec3c9, -20px -20px 60px #ffffff; text-align: center; width: 320px; }
-        input { padding: 15px; border: none; border-radius: 12px; box-shadow: inset 6px 6px 12px #bec3c9, inset -6px -6px 12px #ffffff; background: #e0e5ec; width: 90%; outline: none; margin-bottom: 25px; }
-        button { padding: 15px 30px; border: none; border-radius: 12px; background: #6366f1; color: white; font-weight: bold; cursor: pointer; box-shadow: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff; width: 100%; }
-        button:active { box-shadow: inset 4px 4px 8px #bec3c9, inset -4px -4px 8px #ffffff; }
+        :root { --bg: #e0e5ec; --text: #444; --primary: #6366f1; }
+        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: var(--text); }
+        
+        .card { 
+            background: var(--bg); padding: 30px; border-radius: 30px; 
+            box-shadow: 20px 20px 60px #bec3c9, -20px -20px 60px #ffffff; 
+            width: 90%; max-width: 400px; text-align: center; margin-bottom: 30px;
+        }
+
+        h2 { margin-bottom: 25px; font-weight: 600; }
+        
+        input { 
+            width: 85%; padding: 15px; border: none; border-radius: 12px; 
+            background: var(--bg); outline: none; margin-bottom: 20px;
+            box-shadow: inset 6px 6px 12px #bec3c9, inset -6px -6px 12px #ffffff;
+            transition: 0.3s;
+        }
+
+        button { 
+            width: 95%; padding: 15px; border: none; border-radius: 12px; 
+            background: var(--primary); color: white; font-weight: bold; cursor: pointer;
+            box-shadow: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff; transition: 0.2s;
+        }
+        button:active { box-shadow: inset 4px 4px 8px #a5a9b0, inset -4px -4px 8px #ffffff; transform: scale(0.98); }
+
+        .history-card {
+            width: 90%; max-width: 400px; background: var(--bg); padding: 20px; 
+            border-radius: 30px; box-shadow: 10px 10px 30px #bec3c9, -10px -10px 30px #ffffff;
+        }
+        .history-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; border-radius: 10px; margin-bottom: 10px;
+            box-shadow: 4px 4px 8px #bec3c9, -4px -4px 8px #ffffff; background: var(--bg);
+        }
+        .history-item span { font-size: 13px; font-family: monospace; }
+        .btn-restore { background: #4caf50; padding: 5px 10px; border-radius: 5px; color: white; cursor: pointer; font-size: 12px; border: none; }
     </style>
 </head>
 <body>
+
 <div class="card">
-    <h2>Update ID</h2>
-    <input type="text" id="vidInput" placeholder="YouTube ID">
-    <button onclick="saveToFirebase()">UPDATE</button>
+    <h2>Update Video</h2>
+    <input type="text" id="vidInput" placeholder="Enter YouTube Video ID">
+    <button onclick="updateVideo()">UPDATE NOW</button>
+    <p id="status" style="margin-top:15px; font-size:14px; color: #4caf50;"></p>
 </div>
+
+<div class="history-card">
+    <h3 style="text-align:center;">Update History</h3>
+    <div id="historyList">Loading...</div>
+</div>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyDahNKp2jaiJSHzNkKw_VtcCR55y9-IHTQ",
         databaseURL: "https://lovely-7c35f-default-rtdb.asia-southeast1.firebasedatabase.app"
     };
     firebase.initializeApp(firebaseConfig);
-    function saveToFirebase() {
-        const newId = document.getElementById('vidInput').value.trim();
-        if(newId) {
-            firebase.database().ref('video_data').update({ current_id: newId }).then(() => { alert("Updated!"); });
+    const db = firebase.database();
+
+    function updateVideo() {
+        const id = document.getElementById('vidInput').value.trim();
+        const status = document.getElementById('status');
+        
+        if(id.length < 11) { alert("Invalid ID"); return; }
+
+        db.ref('video_data').update({ current_id: id })
+        .then(() => {
+            db.ref('history').push({
+                video_id: id,
+                timestamp: Date.now()
+            });
+            status.innerText = "Updated Successfully!";
+            document.getElementById('vidInput').value = "";
+            setTimeout(() => { status.innerText = ""; }, 3000);
+        });
+    }
+
+    db.ref('history').limitToLast(5).on('value', (snapshot) => {
+        const historyList = document.getElementById('historyList');
+        historyList.innerHTML = "";
+        const data = snapshot.val();
+        
+        if(data) {
+            Object.keys(data).reverse().forEach(key => {
+                const item = data[key];
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <span>ID: ${item.video_id}</span>
+                    <button class="btn-restore" onclick="restoreID('${item.video_id}')">Use</button>
+                `;
+                historyList.appendChild(div);
+            });
+        } else {
+            historyList.innerHTML = "No history found.";
         }
+    });
+
+    function restoreID(id) {
+        document.getElementById('vidInput').value = id;
     }
 </script>
 </body>
